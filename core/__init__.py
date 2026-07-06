@@ -1,5 +1,6 @@
 from Flask import flask
 from core.extensions import db, bcrypt, jwt, migrate
+from core.config import Config
 
 
 def create_app():
@@ -8,6 +9,8 @@ def create_app():
     """
 
     app = Flask(__name__)
+
+    app.config.from_object(Config)
     
     #initialize extensions
     db.init_app()
