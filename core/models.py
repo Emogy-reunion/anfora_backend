@@ -22,7 +22,7 @@ class BaseModel(db.Model):
 
 class User(BaseModel):
     '''
-    stores the user data
+    stores the company's authentication data
     '''
     __tablename__ = 'users'
 
@@ -33,3 +33,23 @@ class User(BaseModel):
     admin_lastname = db.Column(db.String(255), nullable=False)
     phone_number = db.Column(db.String(255), nullable=False)
     password_hash = db.Column(db.String(255), nullable=False)
+
+
+class Profile(BaseModel):
+    '''
+    stores the company's profile information data
+    '''
+    id = db.Column(UUID(as_uuid=True), primary_key=True, nullable=False, default=uuid.uuid4)
+    logo_url = db.Column(db.String(255), nullable=False)
+    address_line1 = db.Column(db.String(255), nullable=False)
+    city = db.Column(db.String(50), nullable=False)
+    country = db.Column(db.String(3), nullable=False)
+    default_currency = db.Column(db.String(3), nullable=False)
+
+    website = db.Column(db.String(255), nullable=True)
+    legal_business_name = db.Column(db.String(255), nullable=True)
+    tax_identification_number = db.Column(db.String(100), nullable=True)
+    default_payment_terms = db.Column(db.Integer, default=30, nullable=False)
+    default_notes = db.Column(db.Text, nullable=True)
+    postal_code = db.Column(db.String(20), nullable=True)
+    address_line2 = db.Column(db.String(255), nullable=True)
