@@ -19,7 +19,7 @@ class BaseModel(db.Model):
                             onupdate=func.now(),
                             nullable=False)
 
-class User(db.Model):
+class User(BaseModel):
     '''
     stores the user data
     '''
