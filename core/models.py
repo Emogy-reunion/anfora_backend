@@ -1,6 +1,23 @@
 from core.extensions import bcrypt, db
 from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy import func
+from datetime import timezone
 
+
+class BaseModel(db.Model):
+    '''
+    an abstract model to define fields used by all tables
+    it won't be created in the database
+    '''
+    __abstract__ = True
+
+    created_at = db.Column(db.DateTime(timezone=true),
+                           server_default=func.now(),
+                           nullable=False)
+    modified_at = db.Column(db.DateTime(timezone=true),
+                            server_default=func.now(),
+                            onupdate=func.now(),
+                            nullable=False)
 
 class User(db.Model):
     '''
