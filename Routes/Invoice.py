@@ -56,7 +56,7 @@ def generate_invoive():
         }
     }), 200
     
-app.route('/invoice/delete/<int:invoice_id', method=[DELETE]
+app.route('/invoice/delete/<int:invoice_id', method=[DELETE])
 def delete_invoice():
   invoice.query.filter_by(id=invoice_id).delete()
   
