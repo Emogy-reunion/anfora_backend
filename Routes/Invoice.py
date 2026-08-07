@@ -1,7 +1,7 @@
 from flask import Flask, jsonify,request
 from datetime import datetime
 
-app.route('/invoice/auto/generate' method=[POST])
+app.route('/invoice/auto/generate', methods=[POST])
 def generate_invoive():
   
   data=request.jsonify
