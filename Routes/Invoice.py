@@ -1,10 +1,10 @@
-from flask import Flask, jsonify,request
+from flask import Flask, app, jsonify,request
 from datetime import datetime
 
-app.route('/invoice/auto/generate', methods=[POST])
-def generate_invoive():
+app.route('/invoice/auto/generate', methods=['POST'])
+def generate_invoice():
   
-  data=request.jsonify
+  data=request.get_json()
   
   logo_url=data.get('logo_url')
   client_name=data.get('client_name')
