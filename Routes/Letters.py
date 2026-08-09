@@ -1,50 +1,42 @@
-from datetime import datetime
+from flask import Blueprint, jsonify, request, send_file
 import os
-from tempfile import template
-from fastapi import HTTPException
-from sqlmodel import Session
-from jinja2 import Template
-from weasyprint import HTML
+#from app import db
+# from app.auth.decorators import require_roles 
 #from .models import GeneratedLetter
+from services.Letters import LetterService
+
+letters_bp = Blueprint("letters", __name__, url_prefix="/letters")
 
 
-class LetterService:
+@letters_bp.route("/generate-quotation", methods=["POST"])
+def trigger_quotation_letter():
+  try:
+    data = request.get_json() or {}
+    letter_record = LetterService.generate_safari_quotation_letter(data)
 
-  @staticmethod
-  def generate_safari_quotation_letter(
-      db: Session, client_data: dict
-  ) -> GeneratedLetter:
-    
-    
-    letter_title = (
-        f"Official Quotation for {client_data.get('project_name')}"
+    return (
+        jsonify({
+            "status": "Success",
+            "message": "Automated letter successfully generated",
+            "letter_id": letter_record.id,
+            "file_path": letter_record.file_path,
+        }),
+        201,
     )
-    recipient = client_data.get("email")
+  except Exception as e:
+    return jsonify({"status": "Error", "message": str(e)}), 400
 
-    
-    html_content = template.render(client_data)
-    pdf_bytes = HTML(string=html_content).write_pdf()
-    
-    
-    file_dir = "storage/letters"
-    os.makedirs(file_dir, exist_ok=True)
-    file_name = f"quotation_{client_data.get('client_id')}_{int(datetime.utcnow().timestamp())}.pdf"
-    file_path = os.path.join(file_dir, file_name)
 
-    with open(file_path, "wb") as f:
-        f.write(pdf_bytes)
+@letters_bp.route("/download/<int:letter_id>", methods=["GET"])
+def download_letter(letter_id):
+  letter = db.session.get(GeneratedLetter, letter_id)
+  
+  if not letter or not letter.file_path or not os.path.exists(letter.file_path):
+    return jsonify({"status": "Error", "message": "Letter file not found"}), 404
 
-    
-    db_letter = GeneratedLetter(
-        letter_type="quotation_notice",
-        recipient_email=recipient,
-        subject=letter_title,
-        file_path=file_path,
-        status="Generated",
-    )
-
-    db.add(db_letter)
-    db.commit()
-    db.refresh(db_letter)
-
-    return db_letter
+  return send_file(
+      letter.file_path,
+      as_attachment=True,
+      download_name=os.path.basename(letter.file_path),
+      mimetype="application/pdf",
+  )
