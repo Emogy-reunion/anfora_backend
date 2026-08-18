@@ -34,6 +34,20 @@ class User(BaseModel):
     phone_number = db.Column(db.String(255), nullable=False)
     password_hash = db.Column(db.String(255), nullable=False)
 
+    def __init__(self, password=None, **kwargs):
+        super().__init__(**kwargs)
+
+        if password:
+            self.password = password
+
+    @property
+    def password(self):
+        raise AttributeError("Password is write-only and cannot be read.")
+
+    @password.setter
+    def password(self, plain_text_password):
+        self.password_hash = bcrypt.generate_password_hash(plain_text_password)
+
 
 class Profile(BaseModel):
     '''
