@@ -80,4 +80,25 @@ def login():
     except Exception as e:
         return jsonify({"error": "An unexpected error occurred. Please try again!")}, 500
 
+@auth.route('/refresh_token', methods=['POST'])
+@jwt_identity(refresh=True)
+def refresh_token():
+   '''
+   Refeshes the access token after it expires
+   '''
+   try:
+       user_id = uuid.UUID4(get_jwt_identity())
 
+        user = db.session.query(User.email).filter_by(id=user_id).scalar()
+
+        if not user:
+            return jsonify({'error': 'User not found'}), 404
+
+        response = jsonify({"success": "Token refreshed successfully!"})
+        response.status_code == 200
+        acces_token = create_access_token(identity=str(userId))
+        set_access_cookies(response, access_token)
+
+        return response
+    except Exception as e:
+        return jsonify("error": 'An unexpected error occurred. Please try again!'}), 500
