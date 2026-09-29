@@ -1,8 +1,10 @@
 from flask import Blueprint, jsonify, request, send_file
 import os
-#from app import db
-# from app.auth.decorators import require_roles 
-#from .models import GeneratedLetter
+from datetime import datetime
+from flask import render_template
+import pdfkit
+from core.extensions import db
+from core.models import GeneratedLetter
 from services.Letters import LetterService
 
 letters_bp = Blueprint("letters", __name__, url_prefix="/letters")
