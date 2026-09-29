@@ -1,8 +1,11 @@
 from datetime import datetime
 import os
 from flask import render_template
-#import db
-#from .models import GeneratedLetter
+from core.models import GeneratedLetter
+from core.extensions import db
+from datetime import datetime
+from flask import render_template
+import pdfkit
 
 
 class LetterService:
