@@ -1,4 +1,7 @@
 #import the db and the models
+from core.models import CostItem,CostSheet
+from core.extensions import db
+
 
 
 

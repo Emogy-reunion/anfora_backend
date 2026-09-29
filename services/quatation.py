@@ -1,6 +1,9 @@
 #uinstall the db pia 
 #make sure umeimport the quatationitem na quatation model
 #na model ya costing sheet pia
+from core.extensions import db
+from core.models import CostSheet,Quotation,QuotationItem
+
 
 
 class QuotationService:

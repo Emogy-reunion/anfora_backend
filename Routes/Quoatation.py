@@ -1,5 +1,5 @@
 from flask import Blueprint, jsonify, request
-from ..services import QuotationService
+from services.quatation import QuotationService
 
 quotations_bp = Blueprint()
 

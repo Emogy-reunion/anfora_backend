@@ -1,4 +1,6 @@
 from datetime import date, timedelta
+from core.models import Invoice,InvoiceItem,Quotation 
+from core.extensions import db
 #make sure to import the invoice na the quotation models and db session
 #nimespell quotation wrong kwa kuname files btw
 

@@ -1,5 +1,6 @@
 from flask import Blueprint, jsonify, request
-from ..services import Invoices
+from datetime import date
+from services.Invoices import InvoiceService
 
 invoices_bp = Blueprint()
 
@@ -8,7 +9,7 @@ invoices_bp = Blueprint()
 def create_invoice():
   try:
     data = request.get_json() or {}
-    invoice = Invoices.create_invoice(data)
+    invoice = InvoiceService.create_invoice(data)
     return (
         jsonify({
             "status": "Success",
@@ -26,7 +27,7 @@ def create_invoice():
 @invoices_bp.route("/from-quotation/<int:quotation_id>", methods=["POST"])
 def convert_quotation_to_invoice(quotation_id):
   try:
-    invoice = Invoices.create_from_quotation(quotation_id)
+    invoice = InvoiceService.create_from_quotation(quotation_id)
     return (
         jsonify({
             "status": "Success",

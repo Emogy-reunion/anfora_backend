@@ -1,7 +1,7 @@
 from core.extensions import bcrypt, db
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy import func
-from datetime import timezone
+from datetime import timezone,date
 import uuid
 
 
@@ -67,3 +67,123 @@ class Profile(BaseModel):
     default_notes = db.Column(db.Text, nullable=True)
     postal_code = db.Column(db.String(20), nullable=True)
     address_line2 = db.Column(db.String(255), nullable=True)
+    
+
+
+class CostSheet(db.Model):
+    __tablename__ = "cost_sheets"
+
+    id = db.Column(db.Integer, primary_key=True)
+    project_name = db.Column(db.String(255), default="Safari Expedition Package")
+    client_id = db.Column(db.Integer, nullable=True) 
+    
+    total_cost_price = db.Column(db.Float, nullable=False)
+    markup_percentage = db.Column(db.Float, nullable=False)
+    target_profit = db.Column(db.Float, nullable=False)
+    suggested_selling_price = db.Column(db.Float, nullable=False)
+    status = db.Column(db.String(50), default="Draft")
+
+    
+    items = db.relationship(
+        "CostItem", 
+        back_populates="cost_sheet", 
+        cascade="all, delete-orphan"
+    )
+
+
+class CostItem(db.Model):
+    __tablename__ = "cost_items"
+
+    id = db.Column(db.Integer, primary_key=True)
+    cost_sheet_id = db.Column(db.Integer, db.ForeignKey("cost_sheets.id"), nullable=False)
+    
+    category = db.Column(db.String(100), nullable=False)
+    description = db.Column(db.String(255), nullable=False)
+    unit_cost = db.Column(db.Float, nullable=False)
+    quantity = db.Column(db.Float, nullable=False)
+    total_cost = db.Column(db.Float, nullable=False)
+
+    
+    cost_sheet = db.relationship("CostSheet", back_populates="items")
+    
+class Invoice(db.Model):
+    __tablename__ = "invoices"
+
+    id = db.Column(db.Integer, primary_key=True)
+    invoice_number = db.Column(db.String(100), unique=True, nullable=False)
+    quotation_id = db.Column(db.Integer, db.ForeignKey("quotations.id"), nullable=True) 
+    client_id = db.Column(db.Integer, nullable=False) 
+    
+    status = db.Column(db.String(50), default="Unpaid")
+    issue_date = db.Column(db.Date, nullable=False, default=date.today)
+    due_date = db.Column(db.Date, nullable=False)
+    
+    subtotal = db.Column(db.Float, nullable=False)
+    tax_amount = db.Column(db.Float, nullable=False)
+    total_amount = db.Column(db.Float, nullable=False)
+    amount_paid = db.Column(db.Float, default=0.0)
+    balance_due = db.Column(db.Float, nullable=False)
+    
+    notes = db.Column(db.Text, nullable=True)
+
+    
+    items = db.relationship(
+        "InvoiceItem", 
+        back_populates="invoice", 
+        cascade="all, delete-orphan"
+    )
+
+
+class InvoiceItem(db.Model):
+    __tablename__ = "invoice_items"
+
+    id = db.Column(db.Integer, primary_key=True)
+    invoice_id = db.Column(db.Integer, db.ForeignKey("invoices.id"), nullable=False)
+    
+    description = db.Column(db.String(255), nullable=False)
+    quantity = db.Column(db.Float, nullable=False)
+    unit_price = db.Column(db.Float, nullable=False)
+    total_price = db.Column(db.Float, nullable=False)
+
+    
+    invoice = db.relationship("Invoice", back_populates="items")
+class Quotation(db.Model):
+    __tablename__ = "quotations"
+
+    id = db.Column(db.Integer, primary_key=True)
+    quotation_number = db.Column(db.String(100), unique=True, nullable=False)
+    client_id = db.Column(db.Integer, nullable=False)  # Adjust to match your client/user reference if needed
+    
+    expiry_date = db.Column(db.Date, nullable=True)
+    status = db.Column(db.String(50), default="Draft")
+    
+    subtotal = db.Column(db.Float, nullable=False)
+    tax_amount = db.Column(db.Float, nullable=False)
+    total_amount = db.Column(db.Float, nullable=False)
+    
+    notes = db.Column(db.Text, nullable=True)
+
+    
+    items = db.relationship(
+        "QuotationItem", 
+        back_populates="quotation", 
+        cascade="all, delete-orphan"
+    )
+
+    
+    invoices = db.relationship("Invoice", backref="quotation", lazy=True)
+
+
+class QuotationItem(db.Model):
+    __tablename__ = "quotation_items"
+
+    id = db.Column(db.Integer, primary_key=True)
+    quotation_id = db.Column(db.Integer, db.ForeignKey("quotations.id"), nullable=False)
+    
+    description = db.Column(db.String(255), nullable=False)
+    quantity = db.Column(db.Float, nullable=False)
+    unit_price = db.Column(db.Float, nullable=False)
+    total_price = db.Column(db.Float, nullable=False)
+
+    
+    quotation = db.relationship("Quotation", back_populates="items")
