@@ -198,3 +198,95 @@ class GeneratedLetter(db.Model):
     file_path = db.Column(db.String(500), nullable=False)
     status = db.Column(db.String(50), default="Generated")
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    
+class Itinerary(db.Model):
+    __tablename__ = "itineraries"
+
+    id = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.String(255), nullable=False, default="Safari Expedition Itinerary")
+    client_id = db.Column(db.Integer, nullable=True)
+    cost_sheet_id = db.Column(db.Integer, db.ForeignKey("cost_sheets.id"), nullable=True)
+    quotation_id = db.Column(db.Integer, db.ForeignKey("quotations.id"), nullable=True)
+    
+    duration_days = db.Column(db.Integer, nullable=False, default=1)
+    status = db.Column(db.String(50), default="Draft")
+    notes = db.Column(db.Text, nullable=True)
+
+    
+    days = db.relationship(
+        "ItineraryDay", 
+        back_populates="itinerary", 
+        cascade="all, delete-orphan",
+        order_by="ItineraryDay.day_number"
+    )
+
+
+class ItineraryDay(db.Model):
+    __tablename__ = "itinerary_days"
+
+    id = db.Column(db.Integer, primary_key=True)
+    itinerary_id = db.Column(db.Integer, db.ForeignKey("itineraries.id"), nullable=False)
+    
+    day_number = db.Column(db.Integer, nullable=False)
+    title = db.Column(db.String(255), nullable=False)
+    description = db.Column(db.Text, nullable=False)
+    accommodation = db.Column(db.String(255), nullable=True)
+    meals = db.Column(db.String(100), nullable=True) 
+
+    
+    itinerary = db.relationship("Itinerary", back_populates="days")
+class Booking(db.Model):
+    __tablename__ = "bookings"
+
+    id = db.Column(db.Integer, primary_key=True)
+    booking_reference = db.Column(db.String(100), unique=True, nullable=False)
+    client_id = db.Column(db.Integer, nullable=False)
+    
+    # Optional foreign key ties to your workflow documents
+    itinerary_id = db.Column(db.Integer, db.ForeignKey("itineraries.id"), nullable=True)
+    quotation_id = db.Column(db.Integer, db.ForeignKey("quotations.id"), nullable=True)
+    invoice_id = db.Column(db.Integer, db.ForeignKey("invoices.id"), nullable=True)
+    
+    start_date = db.Column(db.Date, nullable=False)
+    end_date = db.Column(db.Date, nullable=False)
+    num_adults = db.Column(db.Integer, default=1)
+    num_children = db.Column(db.Integer, default=0)
+    
+    total_amount = db.Column(db.Float, nullable=False, default=0.0)
+    status = db.Column(db.String(50), default="Pending")  # e.g., Pending, Confirmed, Completed, Cancelled
+    notes = db.Column(db.Text, nullable=True)
+    
+class Supplier(db.Model):
+    __tablename__ = "suppliers"
+
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(255), nullable=False)
+    category = db.Column(db.String(100), nullable=False)  
+    contact_person = db.Column(db.String(255), nullable=True)
+    email = db.Column(db.String(255), nullable=True)
+    phone = db.Column(db.String(50), nullable=True)
+    location = db.Column(db.String(255), nullable=True)
+    payment_terms = db.Column(db.String(255), nullable=True)
+    notes = db.Column(db.Text, nullable=True)
+
+    
+    services = db.relationship(
+        "SupplierServiceItem", 
+        back_populates="supplier", 
+        cascade="all, delete-orphan"
+    )
+
+
+class SupplierServiceItem(db.Model):
+    __tablename__ = "supplier_service_items"
+
+    id = db.Column(db.Integer, primary_key=True)
+    supplier_id = db.Column(db.Integer, db.ForeignKey("suppliers.id"), nullable=False)
+    
+    item_name = db.Column(db.String(255), nullable=False)  
+    description = db.Column(db.Text, nullable=True)
+    unit_cost = db.Column(db.Float, nullable=False)
+    currency = db.Column(db.String(10), default="USD")
+
+    
+    supplier = db.relationship("Supplier", back_populates="services")
