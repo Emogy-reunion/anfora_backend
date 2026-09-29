@@ -1,7 +1,7 @@
 from core.extensions import bcrypt, db
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy import func
-from datetime import timezone,date
+from datetime import timezone,date,datetime
 import uuid
 
 
@@ -187,3 +187,14 @@ class QuotationItem(db.Model):
 
     
     quotation = db.relationship("Quotation", back_populates="items")
+    
+class GeneratedLetter(db.Model):
+    __tablename__ = "generated_letters"
+
+    id = db.Column(db.Integer, primary_key=True)
+    letter_type = db.Column(db.String(100), nullable=False)
+    recipient_email = db.Column(db.String(255), nullable=False)
+    subject = db.Column(db.String(255), nullable=False)
+    file_path = db.Column(db.String(500), nullable=False)
+    status = db.Column(db.String(50), default="Generated")
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
