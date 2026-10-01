@@ -1,7 +1,7 @@
 from flask import Blueprint, jsonify, request
 from services.quatation import QuotationService
 
-quotations_bp = Blueprint()
+quotations_bp = Blueprint('quoatations',__name__)
 
 
 @quotations_bp.route("/quotation/create", methods=["POST"])

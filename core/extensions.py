@@ -4,7 +4,7 @@ from flask_migrate import Migrate
 from flask_sqlalchemy import SQLAlchemy
 
 
-db = SQLALchemy()
+db = SQLAlchemy()
 jwt = JWTManager()
 bcrypt = Bcrypt()
 migrate = Migrate()

@@ -2,7 +2,7 @@ from flask import Blueprint, jsonify, request
 from datetime import date
 from services.Invoices import InvoiceService
 
-invoices_bp = Blueprint()
+invoices_bp = Blueprint("invoices",__name__)
 
 
 @invoices_bp.route("/invoice/create", methods=["POST"])

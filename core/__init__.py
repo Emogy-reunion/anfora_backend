@@ -1,4 +1,4 @@
-from Flask import flask
+from flask import Flask
 from core.extensions import db, bcrypt, jwt, migrate
 from core.config import Config
 

@@ -46,7 +46,14 @@ class User(BaseModel):
 
     @password.setter
     def password(self, plain_text_password):
-        self.password_hash = bcrypt.generate_password_hash(plain_text_password)
+        # Ensure the hash is stored as a string
+        hashed = bcrypt.generate_password_hash(plain_text_password)
+        if isinstance(hashed, bytes):
+            hashed = hashed.decode('utf-8')
+        self.password_hash = hashed
+
+    def verify_password(self, plain_text_password):
+        return bcrypt.check_password_hash(self.password_hash, plain_text_password)
 
 
 class Profile(BaseModel):

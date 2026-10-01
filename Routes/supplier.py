@@ -1,35 +1,39 @@
-from core.extensions import db
-from core.models import Supplier, SupplierServiceItem
+from flask import Blueprint, jsonify, request
+from services.supplier import SupplierServiceManager
+from core.models import Supplier
 
-class SupplierServiceManager:
-    @staticmethod
-    def create_supplier(data: dict) -> Supplier:
-        raw_services = data.get("services", [])
+suppliers_bp = Blueprint("suppliers", __name__)
+
+@suppliers_bp.route("/supplier/create", methods=["POST"])
+def create_supplier():
+    try:
+        data = request.get_json()
+        supplier = SupplierServiceManager.create_supplier(data)
         
-        processed_services = []
-        for svc in raw_services:
-            processed_services.append(
-                SupplierServiceItem(
-                    item_name=svc.get("item_name", "General Service"),
-                    description=svc.get("description"),
-                    unit_cost=float(svc.get("unit_cost", 0.0)),
-                    currency=svc.get("currency", "USD")
-                )
-            )
+        return jsonify({
+            "message": "Supplier created successfully",
+            "supplier_id": supplier.id,
+            "name": supplier.name,
+            "category": supplier.category,
+            "services_count": len(supplier.services)
+        }), 201
+    except Exception as e:
+        return jsonify({"error": str(e)}), 400
 
-        new_supplier = Supplier(
-            name=data.get("name"),
-            category=data.get("category", "Accommodation"),
-            contact_person=data.get("contact_person"),
-            email=data.get("email"),
-            phone=data.get("phone"),
-            location=data.get("location"),
-            payment_terms=data.get("payment_terms"),
-            notes=data.get("notes"),
-            services=processed_services
-        )
 
-        db.session.add(new_supplier)
-        db.session.commit()
-        db.session.refresh(new_supplier)
-        return new_supplier
+@suppliers_bp.route("/suppliers", methods=["GET"])
+def get_suppliers():
+    try:
+        suppliers = Supplier.query.all()
+        result = [{
+            "id": s.id,
+            "name": s.name,
+            "category": s.category,
+            "email": s.email,
+            "phone": s.phone,
+            "location": s.location
+        } for s in suppliers]
+        
+        return jsonify(result), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 400
