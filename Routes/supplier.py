@@ -4,7 +4,7 @@ from core.models import Supplier
 
 suppliers_bp = Blueprint("suppliers", __name__)
 
-@suppliers_bp.route("/supplier/create", methods=["POST"])
+@suppliers_bp.route("/supplier/create", methods=["POST","GET"])
 def create_supplier():
     try:
         data = request.get_json()
