@@ -3,6 +3,11 @@ from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy import func
 from datetime import timezone
 import uuid
+from itsdangerous import URLSafeTimedSerializer
+from core import create_app
+
+
+SALT = 'email-verification'
 
 
 class BaseModel(db.Model):
@@ -47,6 +52,12 @@ class User(BaseModel):
     @password.setter
     def password(self, plain_text_password):
         self.password_hash = bcrypt.generate_password_hash(plain_text_password)
+
+    def _get_serializer():
+        return URLSafeTimedSerializer(current_app.config['SECRET_KEY'])
+
+    def generate_verification_token(self):
+        return _get_serializer().dumps(str(self.id), salt=SALT)
 
 
 class Profile(BaseModel):
