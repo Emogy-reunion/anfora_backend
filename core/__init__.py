@@ -13,9 +13,9 @@ def create_app():
     app.config.from_object(Config)
     
     #initialize extensions
-    db.init_app()
-    bcrypt.init_app()
-    jwt.init_app()
+    db.init_app(app)
+    bcrypt.init_app(app)
+    jwt.init_app(app)
     migrate.init_app(app, db)
 
     return app
