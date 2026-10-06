@@ -3,8 +3,7 @@ from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy import func
 from datetime import timezone
 import uuid
-from itsdangerous import URLSafeTimedSerializer
-from core import create_app
+from itsdangerous import URLSafeTimedSerializer, BadSignature, SignatureExpired
 
 
 SALT = 'email-verification'
@@ -53,11 +52,35 @@ class User(BaseModel):
     def password(self, plain_text_password):
         self.password_hash = bcrypt.generate_password_hash(plain_text_password)
 
+    @staticmethod
     def _get_serializer():
+        '''
+        initializes and returns the serializer
+        '''
         return URLSafeTimedSerializer(current_app.config['SECRET_KEY'])
 
     def generate_verification_token(self):
-        return _get_serializer().dumps(str(self.id), salt=SALT)
+        return self._get_serializer().dumps({'user_id': str(self.id)}, salt=SALT)
+
+    @staticmethod
+    def verify_token(token):
+        '''
+        deserializes the token and retrieves the user id
+        queris the database and returns the user if they exist
+        '''
+        try:
+            data = User._get_serializer().loads(token, salt=SALT, max_age=3600)
+            user_id = uuid.UUID(data['user_id'])
+            user = db.session.get(User, user_id)
+
+            if user:
+                return user
+            else:
+                return None
+        except (BadSignature, SignatureExpired, ValueError, TypeError, KeyError):
+            return None
+
+
 
 
 class Profile(BaseModel):
